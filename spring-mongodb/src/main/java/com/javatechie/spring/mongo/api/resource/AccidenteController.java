@@ -66,12 +66,13 @@ public class AccidenteController {
 	 @Autowired
 	    private MongoTemplate mongoTemplate;
 	 
-	
+	//Devolver todos los accidentes ocurridos entre 2 fechas dadas
 	@GetMapping("/entreFechas/{desde}/{hasta}")
 	public List<Accidente> getEntreFechas(@PathVariable String desde, @PathVariable String hasta) throws ParseException {
 		return repository.findFechas(desde, hasta);
 	}
 	
+	//Convierte los resultado en el formato del arreglo que va a retornar
 	private List<Accidente> getContentFromGeoResults(GeoResults<Accidente> geoResults) {
         List<Accidente> list = new ArrayList<Accidente>();
         for (GeoResult<Accidente> result : geoResults.getContent()) {
@@ -91,10 +92,12 @@ public class AccidenteController {
 	
 	@GetMapping("/puntosMasPeligrosos/{radio}")
 	public List<Accidente> puntosMasPeligrosos(@PathVariable Double radio) throws ParseException {
-		List<Accidente> accidents = mongoTemplate.findAll(Accidente.class).subList(0, 20);
+		 //Me quedo solamente con los primeros 20 para poder probar, ya que la memoria de la computadora no me respondia 
+		 List<Accidente> accidents = mongoTemplate.findAll(Accidente.class).subList(0, 20);
 		 List<Accidente> list = new ArrayList<Accidente>();		 
 		 Map<String, Integer> map = new HashMap<String, Integer>();
 		 for (int i=0;i<accidents.size();i++) {
+			//Para cada punto retorno la cantidad de puntos cercanos que estan a cierto radio recibido por parametro, 
 			Point center = new Point(Double.parseDouble(accidents.get(i).getStartLat()),Double.parseDouble(accidents.get(i).getStartLng()));
 			NearQuery query = NearQuery.near(center).maxDistance(new Distance(radio / 1000, Metrics.KILOMETERS));
 			GeoResults<Accidente> targets = mongoTemplate.geoNear(query, Accidente.class);
@@ -103,23 +106,25 @@ public class AccidenteController {
 				map.put(list.get(j).getId(),list.size());
 			 }
 		 }
+		//Devuelvo los 4 puntos 
 		return accidents.subList(0, 4);
 	}
 	
 		//Dado un punto geográfico y un radio (expresado en kilómetros) devolver todos los accidentes ocurridos dentro del radio.
 		@GetMapping("/distanciaPromedio")
 		public String distanciaPromedio() throws ParseException {
+			//Retonar un objeto accidente que contiene la distancia promedio en su atributo Severity
 			List<Accidente> d = repository.avgDistance();
-			System.out.println("El promedio es:");
-			System.out.println(d.get(0).getSeverity());
+			//Utilizo el atributo Severity para retornar el atributo de la consulta que retorna el promedio
 			return "El promedio es:" + d.get(0).getSeverity();
 		}
 		
-		//Determinar las condiciones más comunes en los accidentes (hora del día, condiciones climáticas, etc).
+		//Determinar las condiciones más comunes en los accidentes.
 		@GetMapping("/condicionesComunes")
 		public List<String> condicionesComunes() throws ParseException {
 					List<Accidente> d = repository.condicionComunClima();
 					List<String> resultado = new ArrayList<String>();
+					//Convierto el resultado que devuelve el repositorio a un formato de string para que retorne la API
 					for (int i=0;i<d.size();i++) {
 						String s =  d.get(i).getId() + ":" + d.get(i).getSeverity(); 
 						resultado.add(s);	
