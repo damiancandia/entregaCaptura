@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: JUnit Jupiter
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0 s <<< FAILURE! - in JUnit Jupiter
+JUnit Jupiter.JUnit Jupiter  Time elapsed: 0 s  <<< ERROR!
+java.lang.NoClassDefFoundError: org/junit/jupiter/api/extension/ScriptEvaluationException
+Caused by: java.lang.ClassNotFoundException: org.junit.jupiter.api.extension.ScriptEvaluationException
+
